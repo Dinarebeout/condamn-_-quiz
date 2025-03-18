@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz: Les Derniers Jours d'un Condamné</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-dark': '#4A49B0',
+                        'light-bg': '#FFFFFF',
+                        'dark-bg': '#181818',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body class="bg-light-bg dark:bg-dark-bg text-gray-900 dark:text-gray-100 min-h-screen">
+    <!-- Detect dark mode -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+<!-- Header -->
+    <header class="bg-primary dark:bg-primary-dark p-4 shadow-md">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
+            <h1 class="text-2xl md:text-3xl font-bold text-white text-center md:text-left mb-2 md:mb-0">
+                Les Derniers Jours d'un Condamné
+            </h1>
+            <div class="flex items-center space-x-4">
+                <span id="visitor-counter" class="text-white bg-primary-dark dark:bg-primary p-2 rounded-md">
+                    <i class="fas fa-users mr-1"></i> Visiteurs: <span id="counter">1</span>
+                </span>
+                <span id="user-score" class="text-white bg-primary-dark dark:bg-primary p-2 rounded-md">
+                    <i class="fas fa-star mr-1"></i> Score: <span id="score">0</span> / <span id="totalQuestions">60</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Welcome & Intro Section -->
+        <section id="intro-section" class="mb-10">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold mb-4 text-primary dark:text-primary border-b pb-2">Bienvenue sur votre Quiz du Bac</h2>
+                <p class="mb-4">Ce site vous aidera à préparer votre épreuve de français sur <strong>"Les Derniers Jours d'un Condamné"</strong> de Victor Hugo.</p>
+                <p class="mb-4">Explorez les différentes sections du quiz pour tester vos connaissances sur ce chef-d'œuvre de la littérature française.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <button id="start-quiz-btn" class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                        Commencer le Quiz
+                    </button>
+                    <button id="show-fiche-btn" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                        Voir la Fiche Technique
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                    <h3 class="font-bold text-lg mb-2 text-primary dark:text-primary">Votre Progression</h3>
+                    <div class="flex items-center">
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                            <div id="progress-bar" class="bg-primary dark:bg-primary-dark h-4 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text" class="ml-2">0%</span>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                    <h3 class="font-bold text-lg mb-2 text-primary dark:text-primary">Questions Correctes</h3>
+                    <div class="text-3xl font-bold"><span id="correct-answers">0</span> / <span id="total-answers">0</span></div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                    <h3 class="font-bold text-lg mb-2 text-primary dark:text-primary">Sections Terminées</h3>
+                    <div class="text-3xl font-bold"><span id="completed-sections">0</span> / 6</div>
+                </div>
+            </div>
+        </section>
+<!-- Quiz Sections Nav -->
+        <section id="quiz-nav" class="hidden mb-10">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4 text-primary dark:text-primary border-b pb-2">Sections du Quiz</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <button data-section="fiche" class="section-btn bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg p-4 text-left focus:outline-none focus:ring-2 focus:ring-primary transition duration-300">
+                        <h3 class="font-bold mb-1">Fiche Technique</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Les informations essentielles sur l'œuvre</p>
+                        <div class="mt-2 flex items-center">
+                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                <div class="section-progress bg-primary dark:bg-primary-dark h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <span class="ml-2 text-xs"><span class="section-progress-text">0</span>%</span>
+                        </div>
+                    </button>
+                    <button data-section="style" class="section-btn bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg p-4 text-left focus:outline-none focus:ring-2 focus:ring-primary transition duration-300">
+                        <h3 class="font-bold mb-1">Style de l'Œuvre</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Analyse du style de Victor Hugo</p>
+                        <div class="mt-2 flex items-center">
+                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                <div class="section-progress bg-primary dark:bg-primary-dark h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <span class="ml-2 text-xs"><span class="section-progress-text">0</span>%</span>
+                        </div>
+                    </button>
+                    <button data-section="chap1-5" class="section-btn bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg p-4 text-left focus:outline-none focus:ring-2 focus:ring-primary transition duration-300">
+                        <h3 class="font-bold mb-1">Chapitres 1-5</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">La condamnation et premiers jours</p>
+                        <div class="mt-2 flex items-center">
+                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                <div class="section-progress bg-primary dark:bg-primary-dark h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <span class="ml-2 text-xs"><span class="section-progress-text">0</span>%</span>
+                        </div>
+                    </button>
+                    <button data-section="chap6-10" class="section-btn bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg p-4 text-left focus:outline-none focus:ring-2 focus:ring-primary transition duration-300">
+                        <h3 class="font-bold mb-1">Chapitres 6-10</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Réflexions sur la mort et la justice</p>
+                        <div class="mt-2 flex items-center">
+                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                <div class="section-progress bg-primary dark:bg-primary-dark h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <span class="ml-2 text-xs"><span class="section-progress-text">0</span>%</span>
+                        </div>
+                    </button>
+                    <button data-section="chap11-30" class="section-btn bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg p-4 text-left focus:outline-none focus:ring-2 focus:ring-primary transition duration-300">
+                        <h3 class="font-bold mb-1">Chapitres 11-30</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Rencontres, rêves et réalité</p>
+                        <div class="mt-2 flex items-center">
+                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                <div class="section-progress bg-primary dark:bg-primary-dark h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <span class="ml-2 text-xs"><span class="section-progress-text">0</span>%</span>
+                        </div>
+                    </button>
+                    <button data-section="chap31-49" class="section-btn bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg p-4 text-left focus:outline-none focus:ring-2 focus:ring-primary transition duration-300">
+                        <h3 class="font-bold mb-1">Chapitres 31-49</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Les derniers moments</p>
+                        <div class="mt-2 flex items-center">
+                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                <div class="section-progress bg-primary dark:bg-primary-dark h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <span class="ml-2 text-xs"><span class="section-progress-text">0</span>%</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </section>
+<!-- Fiche Technique Section -->
+        <section id="fiche-section" class="hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-primary dark:text-primary">Fiche Technique du Roman</h2>
+                    <button id="back-to-nav" class="text-primary dark:text-primary hover:text-primary-dark dark:hover:text-primary-dark transition duration-300">
+                        <i class="fas fa-arrow-left mr-1"></i> Retour
+                    </button>
+                </div>
+                <div class="mb-6">
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>Titre</strong> : <em>Les Derniers Jours d'un Condamné</em></li>
+                        <li><strong>Auteur</strong> : Victor Hugo</li>
+                        <li><strong>Année de publication</strong> : 1829 (première édition anonyme)</li>
+                        <li><strong>Genre</strong> : Roman à thèse (plaidoyer contre la peine de mort)</li>
+                        <li><strong>Éditeur</strong> : Charles Gosselin</li>
+                        <li><strong>Contexte</strong> : France sous la Restauration (1815-1830)</li>
+                        <li><strong>Narrateur</strong> : Un condamné à mort anonyme, à la première personne</li>
+                        <li><strong>Structure</strong> : 49 chapitres courts, formant un journal intime</li>
+                        <li><strong>Thèmes principaux</strong> : Peine de mort, injustice sociale, angoisse, humanité</li>
+                        <li><strong>Cadre</strong> : Prison de Bicêtre, puis La Conciergerie, Paris</li>
+                    </ul>
+                </div>
+                <h3 class="text-xl font-bold mb-4 text-primary dark:text-primary">Analyse du Style</h3>
+                <ul class="list-disc pl-5 space-y-2 mb-6">
+                    <li><strong>Langue</strong> : Émotionnelle, introspective, avec un registre parfois familier ou lyrique.</li>
+                    <li><strong>Tonalité</strong> : Pathétique, angoissée, alternant entre désespoir et révolte.</li>
+                    <li><strong>Point de vue</strong> : Première personne, journal intime du condamné, offrant une immersion totale.</li>
+                    <li><strong>Figures de style</strong> : Métaphores (la mort comme une ombre), hyperboles, exclamations, ellipses.</li>
+                    <li><strong>Rythme</strong> : Irrégulier, saccadé, reflétant l'état psychologique du narrateur.</li>
+                    <li><strong>Thèmes stylisés</strong> : Contraste entre vie et mort, réalisme (description des prisons) et romantisme (émotions exacerbées).</li>
+                    <li><strong>Influence</strong> : Romantisme (expression des sentiments), engagement social de Hugo.</li>
+                </ul>
+                <div class="mt-6">
+                    <button class="start-quiz-section bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300" data-section="fiche">
+                        Commencer le Quiz sur la Fiche Technique
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Container -->
+        <section id="quiz-container" class="hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-primary dark:text-primary">Quiz: Section</h2>
+                    <button id="back-from-quiz" class="text-primary dark:text-primary hover:text-primary-dark dark:hover:text-primary-dark transition duration-300">
+                        <i class="fas fa-arrow-left mr-1"></i> Retour
+                    </button>
+                </div>
+                
+                <!-- Quiz Progress -->
+                <div class="mb-6">
+                    <div class="flex justify-between mb-1 text-sm">
+                        <span>Question <span id="current-question">1</span>/<span id="total-questions">10</span></span>
+                        <span id="quiz-timer" class="hidden">Temps: <span id="timer">60</span>s</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                        <div id="quiz-progress" class="bg-primary dark:bg-primary-dark h-2.5 rounded-full" style="width: 10%"></div>
+                    </div>
+                </div>
+                
+                <!-- Question Container -->
+                <div id="question-container" class="mb-6">
+                    <p id="question-text" class="text-lg font-medium mb-4">Question will appear here</p>
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Feedback Container -->
+                <div id="feedback-container" class="mb-6 p-4 rounded-lg hidden">
+                    <p id="feedback-text" class="font-medium"></p>
+                    <p id="explanation-text" class="mt-2 text-sm italic"></p>
+                </div>
+                
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between">
+                    <button id="check-answer" class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                        Vérifier
+                    </button>
+                    <button id="next-question" class="bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 hidden">
+                        Question Suivante
+                    </button>
+                </div>
+            </div>
+        </section>
+<!-- Quiz Results -->
+        <section id="quiz-results" class="hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-primary dark:text-primary">Résultats du Quiz</h2>
+                    <button id="back-to-sections" class="text-primary dark:text-primary hover:text-primary-dark dark:hover:text-primary-dark transition duration-300">
+                        <i class="fas fa-arrow-left mr-1"></i> Retour aux Sections
+                    </button>
+                </div>
+                
+                <div class="text-center py-6">
+                    <div id="score-circle" class="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+                        <div class="text-center">
+                            <span id="result-score" class="block text-3xl font-bold">0/10</span>
+                            <span id="result-percentage" class="text-sm">0%</span>
+                        </div>
+                    </div>
+                    
+                    <h3 id="result-message" class="text-xl font-bold mb-2">Message</h3>
+                    <p id="result-feedback" class="mb-6">Feedback</p>
+                    
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <button id="retry-section" class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                            Recommencer cette section
+                        </button>
+                        <button id="next-section" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                            Section suivante
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 dark:bg-gray-800 py-4 mt-10">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2024 Quiz "Les Derniers Jours d'un Condamné" - Site Éducatif pour la préparation au Bac</p>
+            <p class="text-sm mt-2">Basé sur le roman de Victor Hugo (1829)</p>
+        </div>
+    </footer>
+
+    <!-- Encouragement Modal -->
+    <div id="encouragement-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md mx-4">
+            <div class="text-center">
+                <i id="modal-icon" class="fas fa-award text-4xl text-yellow-500 mb-3"></i>
+                <h3 id="modal-title" class="text-xl font-bold mb-2">Félicitations !</h3>
+                <p id="modal-message" class="mb-4">Vous avez réussi !</p>
+            </div>
+            <div class="text-center">
+                <button id="close-modal" class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                    Continuer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz Data
+        const quizData = {
+            fiche: [
+                {
+                    question: "Quel est le titre du roman ?",
+                    options: [
+                        "Le Condamné éternel",
+                        "Les Derniers Jours d'un Condamné",
+                        "La Fin d'un Criminel",
+                        "Journal d'un Prisonnier"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le titre reflète le compte à rebours des derniers jours du narrateur avant son exécution."
+                },
+                {
+                    question: "Qui est l'auteur de l'œuvre ?",
+                    options: [
+                        "Honoré de Balzac",
+                        "Victor Hugo",
+                        "Gustave Flaubert",
+                        "Émile Zola"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Victor Hugo, écrivain romantique et engagé, a écrit ce roman pour dénoncer la peine de mort."
+                },
+                {
+                    question: "En quelle année le roman a-t-il été publié pour la première fois ?",
+                    options: [
+                        "1815",
+                        "1829",
+                        "1848",
+                        "1862"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Publié en 1829 sous la Restauration, le roman reflète les débats sur la justice de l'époque."
+                },
+                {
+                    question: "Quel est le genre littéraire du roman ?",
+                    options: [
+                        "Roman historique",
+                        "Roman à thèse",
+                        "Roman d'aventures",
+                        "Roman fantastique"
+                    ],
+                    correctIndex: 1,
+                    explanation: "L'œuvre défend une cause (abolition de la peine de mort) à travers une fiction, typique d'un roman à thèse."
+                },
+                {
+                    question: "Quel est l'éditeur original du livre ?",
+                    options: [
+                        "Gallimard",
+                        "Charles Gosselin",
+                        "Hachette",
+                        "Flammarion"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Charles Gosselin a publié la première édition anonyme en 1829."
+                },
+                {
+                    question: "Dans quel contexte historique se déroule l'histoire ?",
+                    options: [
+                        "Révolution française",
+                        "Restauration (1815-1830)",
+                        "Second Empire",
+                        "Première Guerre mondiale"
+                    ],
+                    correctIndex: 1,
+                    explanation: "L'histoire se situe sous la Restauration, période de retour à la monarchie et de répression."
+                },
+                {
+                    question: "Qui est le narrateur du roman ?",
+                    options: [
+                        "Un juge impartial",
+                        "Un condamné à mort anonyme",
+                        "Victor Hugo lui-même",
+                        "Un gardien de prison"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le narrateur, jamais nommé, raconte ses pensées à la première personne dans un journal."
+                },
+                {
+                    question: "Combien de chapitres composent le roman ?",
+                    options: [
+                        "12",
+                        "25",
+                        "49",
+                        "60"
+                    ],
+                    correctIndex: 2,
+                    explanation: "Le roman est structuré en 49 chapitres brefs, formant un journal fragmenté."
+                },
+                {
+                    question: "Quel est un thème principal du roman ?",
+                    options: [
+                        "L'amour romantique",
+                        "L'injustice de la peine de mort",
+                        "La quête de richesse",
+                        "La guerre"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le roman est un plaidoyer humaniste contre la peine capitale, dénonçant sa cruauté."
+                },
+                {
+                    question: "Où se déroule principalement l'histoire ?",
+                    options: [
+                        "Une île déserte",
+                        "Prison de Bicêtre et La Conciergerie, Paris",
+                        "Une campagne française",
+                        "Londres"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le récit se déroule dans des prisons parisiennes, symboles de l'enfermement et de la justice."
+                }
+            ],
+            style: [
+                {
+                    question: "Quelle est la caractéristique principale de la langue du roman ?",
+                    options: [
+                        "Froide et technique",
+                        "Émotionnelle et introspective",
+                        "Humoristique",
+                        "Abstraite"
+                    ],
+                    correctIndex: 1,
+                    explanation: "La langue traduit les sentiments intenses et les pensées intimes du condamné."
+                },
+                {
+                    question: "Quelle est la tonalité dominante du roman ?",
+                    options: [
+                        "Joyeuse",
+                        "Pathétique et angoissée",
+                        "Neutre",
+                        "Satirique"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le ton reflète la peur et la souffrance du narrateur face à la mort imminente."
+                },
+                {
+                    question: "Quel point de vue est adopté dans le récit ?",
+                    options: [
+                        "Troisième personne omnisciente",
+                        "Première personne, journal intime",
+                        "Deuxième personne",
+                        "Point de vue extérieur"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le narrateur écrit à la première personne, plongeant le lecteur dans son esprit."
+                },
+                {
+                    question: "Quelle figure de style Hugo utilise-t-il souvent pour évoquer la mort ?",
+                    options: [
+                        "L'ironie",
+                        "La métaphore",
+                        "L'antithèse",
+                        "La litote"
+                    ],
+                    correctIndex: 1,
+                    explanation: "La mort est souvent comparée à une ombre ou un abîme, renforçant son omniprésence."
+                },
+                {
+                    question: "Quel est le rythme général du récit ?",
+                    options: [
+                        "Lent et uniforme",
+                        "Saccadé et irrégulier",
+                        "Rapide et fluide",
+                        "Monotone"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Les phrases courtes et les ellipses reflètent l'angoisse et la fragmentation mentale du narrateur."
+                },
+                {
+                    question: "Comment le style mêle-t-il réalisme et romantisme ?",
+                    options: [
+                        "Par des descriptions précises et des émotions intenses",
+                        "Par des dialogues comiques",
+                        "Par des éléments fantastiques",
+                        "Par une narration distante"
+                    ],
+                    correctIndex: 0,
+                    explanation: "Les détails crus des prisons (réalisme) coexistent avec l'exaltation des sentiments (romantisme)."
+                },
+                {
+                    question: "Quelle influence littéraire domine le style ?",
+                    options: [
+                        "Classicisme",
+                        "Romantisme",
+                        "Naturalisme",
+                        "Symbolisme"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le style porte la marque du romantisme avec ses émotions exacerbées et son plaidoyer humaniste."
+                },
+                {
+                    question: "Quel effet les exclamations produisent-elles ?",
+                    options: [
+                        "Elles ralentissent le récit",
+                        "Elles traduisent l'angoisse du narrateur",
+                        "Elles amusent le lecteur",
+                        "Elles décrivent le décor"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Les cris comme 'Oh ! la mort !' expriment le désespoir brut du condamné."
+                },
+                {
+                    question: "Pourquoi le style est-il adapté au journal intime ?",
+                    options: [
+                        "Il est formel et structuré",
+                        "Il est spontané et fragmenté",
+                        "Il évite les émotions",
+                        "Il utilise un langage poétique constant"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Les pensées décousues et les interruptions imitent la forme d'un journal écrit sous pression."
+                },
+                {
+                    question: "Quel est l'effet du style sur le lecteur ?",
+                    options: [
+                        "Une distance froide",
+                        "Une empathie pour le condamné",
+                        "Une confusion narrative",
+                        "Un détachement ironique"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le style immersif et émotionnel suscite la compassion et pousse à réfléchir à la peine de mort."
+                }
+            ],
+            "chap1-5": [
+                {
+                    question: "Que fait le narrateur au début du roman ?",
+                    options: [
+                        "Il fuit la prison",
+                        "Il commence à écrire son journal",
+                        "Il parle aux juges",
+                        "Il rencontre sa famille"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Dès le chapitre 1, le narrateur décide d'écrire pour laisser une trace de ses pensées."
+                },
+                {
+                    question: "Où se trouve le narrateur dans ces chapitres ?",
+                    options: [
+                        "À la Conciergerie",
+                        "À Bicêtre",
+                        "Dans une maison",
+                        "Sur un bateau"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il est emprisonné à Bicêtre, une prison connue pour ses conditions difficiles."
+                },
+                {
+                    question: "Quelle est sa première réaction à la condamnation ?",
+                    options: [
+                        "Il rit de sa situation",
+                        "Il refuse d'y croire",
+                        "Il célèbre sa liberté",
+                        "Il pardonne les juges"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il décrit un état de choc et d'incrédulité face à la sentence (chapitre 1)."
+                },
+                {
+                    question: "Pourquoi décide-t-il d'écrire ?",
+                    options: [
+                        "Pour demander grâce",
+                        "Pour témoigner de son expérience",
+                        "Pour écrire un roman",
+                        "Pour ses enfants"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il veut que son récit serve à d'autres, comme un plaidoyer contre la peine de mort."
+                },
+                {
+                    question: "Que ressent-il dans sa cellule (chapitre 2) ?",
+                    options: [
+                        "De la joie",
+                        "Une angoisse insupportable",
+                        "De l'indifférence",
+                        "De la colère contre Dieu"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il décrit l'horreur de l'attente et la présence constante de la mort."
+                },
+                {
+                    question: "Que voit-il sur les murs de sa cellule ?",
+                    options: [
+                        "Des peintures colorées",
+                        "Des inscriptions de condamnés",
+                        "Des portraits de juges",
+                        "Des messages d'espoir"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Les graffitis des anciens prisonniers renforcent son sentiment d'appartenance à une chaîne de souffrance."
+                },
+                {
+                    question: "Quel bruit le trouble particulièrement ?",
+                    options: [
+                        "Les rires des gardes",
+                        "Le chant des oiseaux",
+                        "Les chaînes des prisonniers",
+                        "Une cloche d'église"
+                    ],
+                    correctIndex: 2,
+                    explanation: "Le bruit des fers symbolise l'enfermement et la mort prochaine (chapitre 3)."
+                },
+                {
+                    question: "Que pense-t-il de sa vie passée (chapitre 4) ?",
+                    options: [
+                        "Elle était misérable",
+                        "Elle était pleine de bonheur",
+                        "Elle n'a plus d'importance",
+                        "Elle était criminelle"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il évoque avec nostalgie une vie simple et heureuse avant sa condamnation."
+                },
+                {
+                    question: "Quel est son crime selon le texte ?",
+                    options: [
+                        "Un vol",
+                        "Un meurtre",
+                        "Une trahison",
+                        "Il reste inconnu"
+                    ],
+                    correctIndex: 3,
+                    explanation: "Hugo ne précise pas le crime, rendant le narrateur universel et son sort plus poignant."
+                },
+                {
+                    question: "Quel est l'effet de ces chapitres sur le lecteur ?",
+                    options: [
+                        "L'ennui",
+                        "Une plongée dans l'angoisse du narrateur",
+                        "Un espoir de rédemption",
+                        "Une critique des juges"
+                    ],
+                    correctIndex: 1,
+                    explanation: "L'immersion dans ses pensées crée une tension immédiate et une empathie."
+                }
+            ],
+"chap6-10": [
+                {
+                    question: "Que décrit le narrateur dans le chapitre 6 ?",
+                    options: [
+                        "Une évasion réussie",
+                        "Les détails de son procès",
+                        "Une visite familiale",
+                        "Un rêve de liberté"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il revient sur son procès, soulignant son caractère expéditif et injuste."
+                },
+                {
+                    question: "Comment perçoit-il les juges ?",
+                    options: [
+                        "Comme des hommes justes",
+                        "Comme des bourreaux insensibles",
+                        "Comme des amis",
+                        "Comme des victimes"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il les voit comme des figures mécaniques, dénuées d'humanité."
+                },
+                {
+                    question: "Que regrette-t-il dans le chapitre 7 ?",
+                    options: [
+                        "Son crime",
+                        "De ne pas avoir fui",
+                        "Sa vie passée",
+                        "De ne pas avoir d'argent"
+                    ],
+                    correctIndex: 2,
+                    explanation: "Il pleure la perte de sa liberté et de ses joies simples."
+                },
+                {
+                    question: "Quel contraste frappe le narrateur ?",
+                    options: [
+                        "Entre riche et pauvre",
+                        "Entre la vie dehors et la prison",
+                        "Entre jour et nuit",
+                        "Entre lui et les gardes"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il entend les bruits de la vie libre, accentuant son désespoir (chapitre 8)."
+                },
+                {
+                    question: "Que pense-t-il de la guillotine ?",
+                    options: [
+                        "Elle est rapide et humaine",
+                        "Elle est une torture mentale",
+                        "Elle est inutile",
+                        "Elle est belle"
+                    ],
+                    correctIndex: 1,
+                    explanation: "L'attente de la guillotine le hante plus que l'acte lui-même (chapitre 9)."
+                },
+                {
+                    question: "Quel souvenir évoque-t-il dans le chapitre 10 ?",
+                    options: [
+                        "Une exécution publique",
+                        "Une fête avec des amis",
+                        "Un voyage",
+                        "Une dispute"
+                    ],
+                    correctIndex: 0,
+                    explanation: "Il se rappelle avoir assisté à une exécution, ironie cruelle vu son sort actuel."
+                },
+                {
+                    question: "Pourquoi cette mémoire le trouble-t-elle ?",
+                    options: [
+                        "Il admire le condamné",
+                        "Il réalise qu'il est maintenant à sa place",
+                        "Il hait la foule",
+                        "Il regrette de ne pas avoir agi"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Ce souvenir le confronte à sa propre fin imminente."
+                },
+                {
+                    question: "Quel est son état d'esprit dominant ?",
+                    options: [
+                        "La résignation",
+                        "La révolte",
+                        "La joie",
+                        "L'indifférence"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il s'indigne contre l'injustice et la cruauté de son sort."
+                },
+                {
+                    question: "Que dénonce-t-il dans ces chapitres ?",
+                    options: [
+                        "La pauvreté",
+                        "Le système judiciaire",
+                        "Les gardiens",
+                        "La religion"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il critique la froideur et l'arbitraire des juges et des lois."
+                },
+                {
+                    question: "Quel effet vise Hugo ici ?",
+                    options: [
+                        "Faire rire",
+                        "Susciter l'indignation",
+                        "Apaiser le lecteur",
+                        "Décrire un décor"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Ces réflexions visent à révolter le lecteur contre la peine de mort."
+                }
+            ],
+            "chap11-30": [
+                {
+                    question: "Que découvre le narrateur dans le chapitre 11 ?",
+                    options: [
+                        "Une lettre de sa famille",
+                        "Les chansons des autres prisonniers",
+                        "Un plan d'évasion",
+                        "Un livre dans sa cellule"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il entend les 'chansons de la chiourme', révélant la vie des autres condamnés à Bicêtre."
+                },
+                {
+                    question: "Que décrit-il dans le cachot (chapitre 13) ?",
+                    options: [
+                        "Une fenêtre lumineuse",
+                        "Une humidité oppressante",
+                        "Un lit confortable",
+                        "Des peintures murales"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Le cachot est présenté comme sombre, humide et étouffant, renforçant son désespoir."
+                },
+                {
+                    question: "Que décrit le narrateur dans le chapitre 16 ?",
+                    options: [
+                        "Un rêve de liberté",
+                        "Une dispute avec un gardien",
+                        "Une visite inattendue",
+                        "La pluie dehors"
+                    ],
+                    correctIndex: 0,
+                    explanation: "Il rêve d'évasion, une échappatoire mentale à sa réalité."
+                },
+                {
+                    question: "Quel cauchemar a-t-il au chapitre 17 ?",
+                    options: [
+                        "Une exécution sanglante",
+                        "Une chute sans fin",
+                        "Une attaque par des bêtes",
+                        "Une noyade"
+                    ],
+                    correctIndex: 0,
+                    explanation: "Il imagine sa propre mort, amplifiant son angoisse."
+                },
+                {
+                    question: "Que se passe-t-il au chapitre 21 ?",
+                    options: [
+                        "Le narrateur est gracié",
+                        "Il est transféré à la Conciergerie",
+                        "Il rencontre un prêtre",
+                        "Il voit sa fille"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il est déplacé de Bicêtre à la Conciergerie, rapprochant l'exécution."
+                },
+                {
+                    question: "Comment voyage-t-il ?",
+                    options: [
+                        "À pied",
+                        "Dans une charrette",
+                        "En diligence",
+                        "À cheval"
+                    ],
+                    correctIndex: 1,
+                    explanation: "La charrette des condamnés symbolise son destin (chapitre 22)."
+                },
+                {
+                    question: "Qui vient voir le narrateur au chapitre 26 ?",
+                    options: [
+                        "Sa mère",
+                        "Sa fille",
+                        "Son frère",
+                        "Un ami"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Sa petite fille, Marie, lui rend visite, offrant un moment poignant."
+                },
+                {
+                    question: "Comment la fille réagit-elle en le voyant ?",
+                    options: [
+                        "Elle le reconnaît avec joie",
+                        "Elle ne le reconnaît pas",
+                        "Elle pleure de peur",
+                        "Elle lui parle longuement"
+                    ],
+                    correctIndex: 1,
+                    explanation: "L'enfant pense que son père est mort, brisant le cœur du narrateur."
+                },
+                {
+                    question: "Que dit-elle qui le bouleverse ?",
+                    options: [
+                        "'Papa est mort'",
+                        "'Je t'aime'",
+                        "'Reviens vite'",
+                        "'Je suis malade'"
+                    ],
+                    correctIndex: 0,
+                    explanation: "Ces mots montrent qu'elle croit son père déjà exécuté, un coup terrible."
+                },
+                {
+                    question: "Quel est l'effet de cette rencontre sur le lecteur ?",
+                    options: [
+                        "L'amusement",
+                        "Une compassion intense",
+                        "L'indifférence",
+                        "La colère contre la fille"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Ce moment humanise le narrateur et renforce le plaidoyer contre la peine de mort."
+                }
+            ],
+            "chap31-49": [
+                {
+                    question: "Que se passe-t-il au chapitre 31 ?",
+                    options: [
+                        "Le narrateur reçoit une grâce",
+                        "Les préparatifs de l'exécution commencent",
+                        "Il rencontre un autre condamné",
+                        "Il rêve de liberté"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Les autorités entament les étapes finales avant son exécution."
+                },
+                {
+                    question: "Qui vient le voir au chapitre 32 ?",
+                    options: [
+                        "Un prêtre",
+                        "Sa femme",
+                        "Un juge",
+                        "Un ami"
+                    ],
+                    correctIndex: 0,
+                    explanation: "Le prêtre vient lui offrir un soutien spirituel, qu'il rejette partiellement."
+                },
+                {
+                    question: "Que décrit-il au chapitre 33 ?",
+                    options: [
+                        "Une tentative d'évasion",
+                        "L'arrivée des fers",
+                        "Une chanson entendue",
+                        "Un souvenir d'enfance"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Les fers symbolisent l'approche imminente de la guillotine."
+                },
+                {
+                    question: "Que fait le narrateur au chapitre 36 ?",
+                    options: [
+                        "Il tente de s'évader",
+                        "Il espère une grâce",
+                        "Il écrit une lettre",
+                        "Il dort"
+                    ],
+correctIndex: 1,
+                    explanation: "Il s'accroche à l'idée d'une clémence royale."
+                },
+                {
+                    question: "Quel espoir s'effondre au chapitre 38 ?",
+                    options: [
+                        "Une évasion",
+                        "La grâce du roi",
+                        "Une révolte populaire",
+                        "Une aide divine"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il apprend que sa demande de grâce est rejetée."
+                },
+                {
+                    question: "Que décrit le narrateur au chapitre 41 ?",
+                    options: [
+                        "Son dernier repas",
+                        "La foule attendant l'exécution",
+                        "Une tentative d'évasion",
+                        "Une prière"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il observe la foule venue assister au spectacle macabre."
+                },
+                {
+                    question: "Comment perçoit-il cette foule ?",
+                    options: [
+                        "Comme compatissante",
+                        "Comme cruelle et curieuse",
+                        "Comme indifférente",
+                        "Comme salvatrice"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il la voit comme avide de sang, dénonçant sa barbarie."
+                },
+                {
+                    question: "Que fait le narrateur au chapitre 46 ?",
+                    options: [
+                        "Il prie avec le prêtre",
+                        "Il écrit ses dernières lignes",
+                        "Il tente de s'échapper",
+                        "Il parle à la foule"
+                    ],
+                    correctIndex: 1,
+                    explanation: "Il note ses pensées jusqu'au bout, défiant la mort."
+                },
+                {
+                    question: "Quel est son dernier mot écrit ?",
+                    options: [
+                        "'Adieu'",
+                        "'Pardon'",
+                        "'Quatre…'",
+                        "'Liberté'"
+                    ],
+                    correctIndex: 2,
+                    explanation: "Il compte les heures et s'arrête, coupé par l'exécution."
+                },
+                {
+                    question: "Quel est le message de Hugo dans cette fin ?",
+                    options: [
+                        "La justice triomphe",
+                        "La peine de mort est inhumaine",
+                        "La vie continue",
+                        "Les condamnés méritent leur sort"
+                    ],
+                    correctIndex: 1,
+                    explanation: "La conclusion abrupte condamne la barbarie de l'exécution."
+                }
+            ]
+        };
+
+        // State management
+        let currentSection = null;
+        let currentQuestionIndex = 0;
+        let userScore = 0;
+        let selectedOption = null;
+        let userProgress = {
+            fiche: { attempted: 0, correct: 0 },
+            style: { attempted: 0, correct: 0 },
+            "chap1-5": { attempted: 0, correct: 0 },
+            "chap6-10": { attempted: 0, correct: 0 },
+            "chap11-30": { attempted: 0, correct: 0 },
+            "chap31-49": { attempted: 0, correct: 0 }
+        };
+
+        // Get DOM elements
+        const sections = {
+            intro: document.getElementById('intro-section'),
+            nav: document.getElementById('quiz-nav'),
+            fiche: document.getElementById('fiche-section'),
+            quiz: document.getElementById('quiz-container'),
+            results: document.getElementById('quiz-results')
+        };
+
+        // Init function to setup the application
+        function init() {
+            loadUserProgress();
+            updateVisitorCount();
+            updateProgressUI();
+            
+            // Event listeners
+            document.getElementById('start-quiz-btn').addEventListener('click', () => {
+                showSection('nav');
+            });
+            
+            document.getElementById('show-fiche-btn').addEventListener('click', () => {
+                showSection('fiche');
+            });
+            
+            document.getElementById('back-to-nav').addEventListener('click', () => {
+                showSection('nav');
+            });
+            
+            document.getElementById('back-from-quiz').addEventListener('click', () => {
+                showSection('nav');
+            });
+            
+            document.getElementById('back-to-sections').addEventListener('click', () => {
+                showSection('nav');
+            });
+            
+            document.getElementById('check-answer').addEventListener('click', checkAnswer);
+            document.getElementById('next-question').addEventListener('click', nextQuestion);
+            document.getElementById('retry-section').addEventListener('click', retrySection);
+            document.getElementById('next-section').addEventListener('click', goToNextSection);
+            document.getElementById('close-modal').addEventListener('click', closeEncouragementModal);
+            
+            // Add event listeners to all section buttons
+            document.querySelectorAll('.section-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    startQuiz(btn.dataset.section);
+                });
+            });
+            
+            // Add event listeners to "start quiz" buttons in sections
+            document.querySelectorAll('.start-quiz-section').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    startQuiz(btn.dataset.section);
+                });
+            });
+        }
+
+        // Show a specific section and hide others
+        function showSection(sectionName) {
+            Object.keys(sections).forEach(key => {
+                if (key === sectionName) {
+                    sections[key].classList.remove('hidden');
+                } else {
+                    sections[key].classList.add('hidden');
+                }
+            });
+        }
+
+        // Start a quiz section
+        function startQuiz(section) {
+            currentSection = section;
+            currentQuestionIndex = 0;
+            selectedOption = null;
+            
+            // Update quiz title
+            const sectionNames = {
+                fiche: "Fiche Technique",
+                style: "Style de l'Œuvre",
+                "chap1-5": "Chapitres 1-5",
+                "chap6-10": "Chapitres 6-10",
+                "chap11-30": "Chapitres 11-30",
+                "chap31-49": "Chapitres 31-49"
+            };
+            
+            document.getElementById('quiz-title').textContent = `Quiz: ${sectionNames[section]}`;
+            document.getElementById('total-questions').textContent = quizData[section].length;
+            
+            loadQuestion();
+            showSection('quiz');
+        }
+
+        // Load a question
+        function loadQuestion() {
+            const question = quizData[currentSection][currentQuestionIndex];
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('question-text').textContent = question.question;
+            
+            // Update progress bar
+            const progressPercentage = ((currentQuestionIndex + 1) / quizData[currentSection].length) * 100;
+            document.getElementById('quiz-progress').style.width = `${progressPercentage}%`;
+            
+            // Clear previous options and feedback
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            document.getElementById('feedback-container').classList.add('hidden');
+            document.getElementById('check-answer').classList.remove('hidden');
+            document.getElementById('next-question').classList.add('hidden');
+            
+            // Add new options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300';
+                optionElement.innerHTML = `
+                    <input type="radio" name="quiz-option" id="option-${index}" class="hidden" value="${index}">
+                    <label for="option-${index}" class="flex items-center cursor-pointer w-full">
+                        <span class="w-6 h-6 flex items-center justify-center border border-gray-400 dark:border-gray-500 rounded-full mr-3">
+                            <span class="option-indicator hidden w-4 h-4 bg-primary dark:bg-primary-dark rounded-full"></span>
+                        </span>
+                        <span>${option}</span>
+                    </label>
+                `;
+                
+                optionElement.addEventListener('click', () => {
+                    selectOption(index);
+                });
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            selectedOption = null;
+        }
+
+        // Handle option selection
+        function selectOption(index) {
+            selectedOption = index;
+            
+            // Update UI
+            document.querySelectorAll('#options-container .option-indicator').forEach((indicator, i) => {
+                if (i === index) {
+                    indicator.classList.remove('hidden');
+                    indicator.parentElement.parentElement.parentElement.classList.add('bg-gray-100', 'dark:bg-gray-700');
+                } else {
+                    indicator.classList.add('hidden');
+                    indicator.parentElement.parentElement.parentElement.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+                }
+            });
+        }
+
+        // Check the answer
+        function checkAnswer() {
+            if (selectedOption === null) {
+                showEncouragementModal('Attention', 'Veuillez sélectionner une réponse.', 'fa-exclamation-circle text-yellow-500');
+                return;
+            }
+            
+            const question = quizData[currentSection][currentQuestionIndex];
+            const isCorrect = selectedOption === question.correctIndex;
+            
+            // Update user progress
+            userProgress[currentSection].attempted++;
+            if (isCorrect) {
+                userProgress[currentSection].correct++;
+                userScore++;
+            }
+            
+            // Show feedback
+            const feedbackContainer = document.getElementById('feedback-container');
+            const feedbackText = document.getElementById('feedback-text');
+            const explanationText = document.getElementById('explanation-text');
+            
+            feedbackContainer.classList.remove('hidden', 'bg-green-100', 'bg-red-100', 'dark:bg-green-800', 'dark:bg-red-800', 'text-green-800', 'text-red-800', 'dark:text-green-100', 'dark:text-red-100');
+            
+            if (isCorrect) {
+                feedbackContainer.classList.add('bg-green-100', 'dark:bg-green-800', 'text-green-800', 'dark:text-green-100');
+                feedbackText.textContent = 'Correct ! Bravo !';
+            } else {
+                feedbackContainer.classList.add('bg-red-100', 'dark:bg-red-800', 'text-red-800', 'dark:text-red-100');
+                feedbackText.textContent = `Incorrect. La bonne réponse était : ${question.options[question.correctIndex]}`;
+            }
+            
+            explanationText.textContent = question.explanation;
+            
+            // Update UI
+            document.getElementById('check-answer').classList.add('hidden');
+            document.getElementById('next-question').classList.remove('hidden');
+            
+            saveUserProgress();
+            updateProgressUI();
+        }
+
+        // Go to next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex >= quizData[currentSection].length) {
+                // End of quiz section, show results
+                showQuizResults();
+            } else {
+                loadQuestion();
+            }
+        }
+
+        // Show quiz results
+        function showQuizResults() {
+            const sectionScore = userProgress[currentSection].correct;
+            const sectionTotal = quizData[currentSection].length;
+            const percentage = Math.round((sectionScore / sectionTotal) * 100);
+            
+document.getElementById('result-score').textContent = `${sectionScore}/${sectionTotal}`;
+            document.getElementById('result-percentage').textContent = `${percentage}%`;
+            
+            // Set result message
+            const resultMessage = document.getElementById('result-message');
+            const resultFeedback = document.getElementById('result-feedback');
+            
+            if (percentage >= 90) {
+                resultMessage.textContent = 'Excellent !';
+                resultFeedback.textContent = 'Vous maîtrisez parfaitement cette section. Continuez ainsi !';
+            } else if (percentage >= 70) {
+                resultMessage.textContent = 'Très bien !';
+                resultFeedback.textContent = 'Vous avez une bonne compréhension de cette section.';
+            } else if (percentage >= 50) {
+                resultMessage.textContent = 'Bon travail';
+                resultFeedback.textContent = 'Vous avez compris les bases, mais il vous reste quelques points à revoir.';
+            } else {
+                resultMessage.textContent = 'À améliorer';
+                resultFeedback.textContent = 'Cette section nécessite un peu plus de travail. N\'hésitez pas à relire le roman et à réessayer !';
+            }
+            
+            // Update score circle color
+            const scoreCircle = document.getElementById('score-circle');
+            scoreCircle.className = 'inline-flex items-center justify-center w-32 h-32 rounded-full mb-4';
+            
+            if (percentage >= 70) {
+                scoreCircle.classList.add('bg-green-100', 'dark:bg-green-800', 'text-green-800', 'dark:text-green-100');
+            } else if (percentage >= 50) {
+                scoreCircle.classList.add('bg-yellow-100', 'dark:bg-yellow-800', 'text-yellow-800', 'dark:text-yellow-100');
+            } else {
+                scoreCircle.classList.add('bg-red-100', 'dark:bg-red-800', 'text-red-800', 'dark:text-red-100');
+            }
+            
+            showSection('results');
+            
+            // Show encouragement modal if score is good
+            if (percentage >= 70) {
+                const modalMessages = [
+                    'Excellent travail ! Votre maîtrise du roman est impressionnante.',
+                    'Bravo ! Victor Hugo serait fier de vous.',
+                    'Superbe ! Vous êtes sur la bonne voie pour le bac !',
+                    'Félicitations ! Votre connaissance du roman est remarquable.'
+                ];
+                
+                const randomMessage = modalMessages[Math.floor(Math.random() * modalMessages.length)];
+                showEncouragementModal('Félicitations !', randomMessage, 'fa-award text-yellow-500');
+            }
+        }
+
+        // Retry section
+        function retrySection() {
+            startQuiz(currentSection);
+        }
+
+        // Go to next section
+        function goToNextSection() {
+            const sections = ['fiche', 'style', 'chap1-5', 'chap6-10', 'chap11-30', 'chap31-49'];
+            const currentIndex = sections.indexOf(currentSection);
+            
+            if (currentIndex < sections.length - 1) {
+                startQuiz(sections[currentIndex + 1]);
+            } else {
+                showSection('nav');
+                showEncouragementModal('Félicitations !', 'Vous avez terminé toutes les sections ! Vous êtes prêt pour le bac !', 'fa-graduation-cap text-yellow-500');
+            }
+        }
+
+        // Load user progress from localStorage
+        function loadUserProgress() {
+            const savedProgress = localStorage.getItem('ldujProgress');
+            if (savedProgress) {
+                userProgress = JSON.parse(savedProgress);
+                
+                // Calculate total score
+                userScore = 0;
+                Object.values(userProgress).forEach(section => {
+                    userScore += section.correct;
+                });
+            }
+        }
+
+        // Save user progress to localStorage
+        function saveUserProgress() {
+            localStorage.setItem('ldujProgress', JSON.stringify(userProgress));
+            // Update displayed score
+            document.getElementById('score').textContent = userScore;
+        }
+
+        // Update progress UI
+        function updateProgressUI() {
+            // Update main score
+            document.getElementById('score').textContent = userScore;
+            
+            // Calculate total questions answered correctly
+            let totalCorrect = 0;
+            let totalAttempted = 0;
+            let completedSections = 0;
+            
+            Object.entries(userProgress).forEach(([section, data]) => {
+                totalCorrect += data.correct;
+                totalAttempted += data.attempted;
+                
+                // Check if section is complete
+                if (data.attempted >= quizData[section].length) {
+                    completedSections++;
+                }
+                
+                // Update section progress
+                const sectionButtons = document.querySelectorAll(`.section-btn[data-section="${section}"] .section-progress`);
+                const sectionTexts = document.querySelectorAll(`.section-btn[data-section="${section}"] .section-progress-text`);
+                
+                const sectionPercentage = quizData[section].length > 0 
+                    ? Math.round((data.attempted / quizData[section].length) * 100) 
+                    : 0;
+                
+                sectionButtons.forEach(el => {
+                    el.style.width = `${sectionPercentage}%`;
+                });
+                
+                sectionTexts.forEach(el => {
+                    el.textContent = sectionPercentage;
+                });
+            });
+            
+            // Update global stats
+            document.getElementById('correct-answers').textContent = totalCorrect;
+            document.getElementById('total-answers').textContent = totalAttempted;
+            document.getElementById('completed-sections').textContent = completedSections;
+            
+            // Update progress bar
+            const totalQuestions = Object.values(quizData).reduce((acc, section) => acc + section.length, 0);
+            const progressPercentage = totalQuestions > 0 
+                ? Math.round((totalAttempted / totalQuestions) * 100) 
+                : 0;
+            
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+            document.getElementById('progress-text').textContent = `${progressPercentage}%`;
+        }
+
+        // Update visitor count
+        function updateVisitorCount() {
+            let count = localStorage.getItem('ldujVisitorCount');
+            
+            if (!count) {
+                count = Math.floor(Math.random() * 100) + 50; // Start with a random count between 50-150
+            } else {
+                count = parseInt(count) + 1;
+            }
+            
+            localStorage.setItem('ldujVisitorCount', count);
+            document.getElementById('counter').textContent = count;
+        }
+
+        // Show encouragement modal
+        function showEncouragementModal(title, message, icon) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-icon').className = `fas ${icon} text-4xl mb-3`;
+            document.getElementById('encouragement-modal').classList.remove('hidden');
+        }
+
+        // Close encouragement modal
+        function closeEncouragementModal() {
+            document.getElementById('encouragement-modal').classList.add('hidden');
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+
